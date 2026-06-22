@@ -53,9 +53,9 @@ RUN addgroup -g 1001 piped 2>/dev/null || true && \
 # Expose port
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+# Healthcheck using curl
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/healthz || exit 1
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
