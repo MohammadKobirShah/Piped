@@ -5,11 +5,11 @@
 # - Lite: nginx:alpine final stage (~22MB)
 # - Stable: Multi-stage build, health checks
 # - Railway: PORT env, auto-detection
-# - Fixed: BuildKit compatible, proper caching
+# - Fixed: Node.js 22 for pnpm compatibility
 # ============================================
 
 # ---- Stage 1: Build ----
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 # Copy dependency files first (for better caching)
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-# Install dependencies (without BuildKit cache mounts for compatibility)
+# Install dependencies
 RUN pnpm install --frozen-lockfile --prefer-offline
 
 # Copy source code
