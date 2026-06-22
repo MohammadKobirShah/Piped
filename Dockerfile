@@ -5,6 +5,7 @@
 # - Lite: nginx:alpine final stage (~22MB)
 # - Stable: Multi-stage build, health checks
 # - Railway: PORT env, auto-detection
+# - Fixed: BuildKit compatible, proper caching
 # ============================================
 
 # ---- Stage 1: Build ----
@@ -15,14 +16,16 @@ WORKDIR /app
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Cache dependencies
-COPY package.json pnpm-lock.yaml ./
-RUN --mount=type=cache,target=/root/.local/share/pnpm \
-    --mount=type=cache,target=/app/node_modules \
-    pnpm install --frozen-lockfile --prefer-offline
+# Copy dependency files first (for better caching)
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-# Copy source & build
+# Install dependencies (without BuildKit cache mounts for compatibility)
+RUN pnpm install --frozen-lockfile --prefer-offline
+
+# Copy source code
 COPY . .
+
+# Build the app
 RUN pnpm build
 
 # ---- Stage 2: Production ----
@@ -38,9 +41,9 @@ COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 # Copy built assets
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Create non-root user
-RUN addgroup -g 1001 piped && \
-    adduser -D -u 1001 -G piped piped && \
+# Create non-root user (with error handling)
+RUN addgroup -g 1001 piped 2>/dev/null || true && \
+    adduser -D -u 1001 -G piped piped 2>/dev/null || true && \
     chown -R piped:piped /usr/share/nginx/html && \
     chown -R piped:piped /var/cache/nginx && \
     chown -R piped:piped /var/log/nginx && \

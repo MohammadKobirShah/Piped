@@ -14,15 +14,21 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-# Check Docker Compose
-if ! command -v docker-compose &> /dev/null; then
+# Check Docker Compose (support both old and new syntax)
+if docker compose version &> /dev/null; then
+    COMPOSE_CMD="docker compose"
+elif command -v docker-compose &> /dev/null; then
+    COMPOSE_CMD="docker-compose"
+else
     echo "❌ Docker Compose not found. Install it first."
     exit 1
 fi
 
+echo "✅ Using: $COMPOSE_CMD"
+
 # Build image
 echo "📦 Building Docker image..."
-docker build -t piped-nginx .
+$COMPOSE_CMD build
 
 # Stop existing container
 echo "🛑 Stopping existing container..."
@@ -31,11 +37,7 @@ docker rm piped-frontend 2>/dev/null || true
 
 # Run container
 echo "▶️  Starting container..."
-docker run -d \
-    --name piped-frontend \
-    --restart unless-stopped \
-    -p ${PORT:-3000}:3000 \
-    piped-nginx
+$COMPOSE_CMD up -d
 
 # Wait for health
 echo "⏳ Waiting for health check..."
@@ -55,3 +57,5 @@ echo "🌐 URL: http://localhost:${PORT:-3000}"
 echo "📊 Status: docker inspect piped-frontend"
 echo "📝 Logs: docker logs -f piped-frontend"
 echo "🛑 Stop: docker stop piped-frontend"
+echo "🔄 Restart: $COMPOSE_CMD restart"
+echo "🗑️  Remove: $COMPOSE_CMD down"

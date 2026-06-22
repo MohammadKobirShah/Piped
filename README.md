@@ -17,49 +17,31 @@
 
 ```bash
 # Clone & enter directory
-git clone https://github.com/TeamPiped/Piped.git
+git clone https://github.com/MohammadKobirShah/Piped.git
 cd Piped
 
-# Copy nginx config
-mkdir -p nginx
-cp /path/to/piped-nginx-docker/nginx/* nginx/
-cp /path/to/piped-nginx-docker/Dockerfile .
-cp /path/to/piped-nginx-docker/.dockerignore .
-cp /path/to/piped-nginx-docker/docker-compose.yml .
-
-# Build & run
-docker-compose up -d
-
-# Visit http://localhost:3000
+# Deploy
+./deploy.sh
 ```
 
 ### Railway Deployment
 
 1. **Fork** `https://github.com/TeamPiped/Piped`
 
-2. **Copy files** to your fork:
-   ```
-   Dockerfile
-   nginx/nginx.conf
-   nginx/default.conf
-   .dockerignore
-   railway.json
-   ```
-
-3. **Connect** to Railway:
+2. **Connect** to Railway:
    ```bash
    railway login
    railway init
    railway up
    ```
 
-4. **Set variables** (Railway Dashboard):
+3. **Set variables** (Railway Dashboard):
    ```
    PORT=3000
    NODE_ENV=production
    ```
 
-5. **Deploy** 🚀
+4. **Deploy** 🚀
 
 ## 📁 File Structure
 
@@ -69,6 +51,7 @@ piped/
 ├── docker-compose.yml      # Local development
 ├── railway.json            # Railway config
 ├── .dockerignore           # Build optimization
+├── deploy.sh               # Auto deploy script
 ├── nginx/
 │   ├── nginx.conf          # Main nginx config
 │   └── default.conf        # Server block
