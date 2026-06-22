@@ -45,8 +45,7 @@ export function numberFormat(num) {
 }
 
 export function addCommas(num) {
-    num = parseInt(num);
-    return num.toLocaleString("en-US");
+    return parseInt(num).toLocaleString("en-US");
 }
 
 export function timeAgo(time) {
@@ -54,15 +53,6 @@ export function timeAgo(time) {
 }
 
 export async function getDefaultLanguage() {
-    const languages = window.navigator.languages;
-    for (let i = 0; i < languages.length; i++) {
-        try {
-            // Dynamic import of locale files
-            await import(`../locales/${languages[i]}.json`);
-            return languages[i];
-        } catch {
-            continue;
-        }
-    }
+    // Always return English as default language
     return "en";
 }
